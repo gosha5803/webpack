@@ -1,1 +1,0 @@
-export var calc = (a, b) => a*b
