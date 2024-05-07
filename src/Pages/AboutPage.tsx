@@ -1,17 +1,17 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import PngAvatar from '@/assets/avatar.png'
 import CalendarSvg from '@/assets/calendar.svg'
 
 var AboutPage: FC = () => {
-    var pow = (a:number) => a**2
-    console.log(pow('4'))
+    var [color, setColor] = useState<'orange' | 'blue'>('orange')
+    var switchColor = () => setColor(prev => prev == 'blue' ? 'orange' : 'blue')
 
-    throw new Error('komjn')
     return(
         <div>
             About Page
             <img src={PngAvatar} width={200}/>
-            <CalendarSvg color="orange" height={100} width={100}/>
+            <h2 style={{color}}>This app was loaded by: {__LOADER__} loader</h2>
+            <CalendarSvg color={color} onClick={() => switchColor()} height={100} width={100}/>
         </div>
     )
 }

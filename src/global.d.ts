@@ -15,3 +15,4 @@ declare module '*.svg' {
   }
 
 declare var __PLATFORM__: 'mobile' | 'desktop'
+declare var __LOADER__: 'esBuild' | 'typescript'

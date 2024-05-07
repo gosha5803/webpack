@@ -1,28 +1,49 @@
-import { Configuration, ModuleOptions } from "webpack";
-import { BuildOptions } from "./types/types";
+import { Configuration, ModuleOptions, RuleSetRule } from "webpack";
+import { BuildLoader, BuildOptions } from "./types/types";
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import ReactRefreshTypeScript from 'react-refresh-typescript'
+import { buildBabelLoader } from "./babel/buildBabelLoader";
 
 export var buildLoaders = (options: BuildOptions):ModuleOptions['rules'] => {
-    var {mode} = options
+    var {mode, paths} = options
     var isDev = mode === 'development'
 
-    var tsLoader = {
-        exclude: /node_modules/,
-        test: /\.tsx?$/,
-        use: [
-            {
-                loader: 'ts-loader',
-                options: {
-                    transpileOnly: true,
-                    getCustomTransformers: () => ({
-                        before: [isDev && ReactRefreshTypeScript()].filter(Boolean)
-                    })
+    var jsLoaders: Record<BuildLoader, RuleSetRule> = {
+        typescript: {
+            exclude: /node_modules/,
+            test: /\.tsx?$/,
+            use: [
+                {
+                    loader: 'ts-loader',
+                    options: {
+                        // transpileOnly: true,
+                        getCustomTransformers: () => ({
+                            before: [isDev && ReactRefreshTypeScript()].filter(Boolean)
+                        })
+                    }
                 }
+            ],
+        },
+        esBuild: {
+            exclude: /node_modules/,
+            test: /\.[jt]sx?$/,
+            loader: 'esbuild-loader',
+            options: {
+                target: 'es2015',
+                tsconfig: paths.tsconfig
             }
-        ],
+        },
+        babel: buildBabelLoader(options),
+        // swc: {
+        //     test: /\.ts(x?)$/,
+        //     exclude: /(node_modules)/,
+        //     use: {
+        //       // `.swcrc` can be used to configure swc
+        //       loader: "swc-loader"
+        //     }
+        //   }
     }
-
+    
     var cssLoader = {
         loader: "css-loader",
             options: {
@@ -71,8 +92,9 @@ export var buildLoaders = (options: BuildOptions):ModuleOptions['rules'] => {
 
     return [
         assetsLoader, 
-        sassLoader, 
-        tsLoader, 
+        sassLoader,
+        jsLoaders[options.loader],
+        // babelLoader, 
         svgLoader
     ]
 }
